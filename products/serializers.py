@@ -5,6 +5,9 @@ def getShortProduct(product):
     res = {
         "id": product.id,
         "name": product.name,
+        "description": product.description,
+        "price": product.price,
+        "date": product.date,
         "mainImg": getImage(ProductImage.objects.get(product = product, main = True).image),
     }
     return res

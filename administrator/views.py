@@ -8,7 +8,7 @@ from products.models import Product, ProductImage
 from .models import User, Token
 from rest_framework import status
 from orders.serializers import getOrder
-from products.serializers import getProduct
+from products.serializers import getProduct, getShortProduct
 from django.shortcuts import get_object_or_404
 from functools import wraps
 from django.contrib.auth.hashers import make_password, verify_password
@@ -89,7 +89,7 @@ def getProducts(request, index):
         "more": (products.count() - 10 * (index - 1)) >= 10
     }
     for product in products[10 * (index - 1): 10 * index]:
-        res["products"].append(getProduct(product))
+        res["products"].append(getShortProduct(product))
     return JsonResponse(res, status=status.HTTP_200_OK, safe=False)
 
 
