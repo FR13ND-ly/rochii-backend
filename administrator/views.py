@@ -7,7 +7,6 @@ from orders.models import Order, OrderProduct
 from products.models import Product, ProductImage
 from .models import User, Token
 from rest_framework import status
-from django.conf import settings
 from orders.serializers import getOrder
 from products.serializers import getProduct
 from django.shortcuts import get_object_or_404
@@ -81,6 +80,9 @@ def register(request):
 
 @isAdmin
 def getProducts(request, index):
+    for image in Image.objects.all():
+        if ProductImage.objects.filter(image = image).count() == 0:
+            image.delete()
     products = Product.objects.order_by("-date")
     res = {
         "products": [],
