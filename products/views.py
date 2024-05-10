@@ -6,17 +6,24 @@ from rest_framework import status
 from .serializers import getShortProduct, getProduct
 from django.shortcuts import get_object_or_404
 from random import sample
-
+from django.core.paginator import Paginator
 
 def getProducts(request, index):
+    page_size = 10 
     products = Product.objects.order_by("-date")
-    res = {
-        "products": [],
-        "more": (products.count() - 10 * (index - 1)) >= 10
-    }
-    for product in products[10 * (index - 1): 10 * index]:
-        res["products"].append(getShortProduct(product))
-    return JsonResponse(res, status=status.HTTP_200_OK, safe=False)
+
+    paginator = Paginator(products, page_size)
+    try:
+        page = paginator.page(index)
+    except:
+        return JsonResponse({'error': 'Invalid page index'}, status=status.HTTP_400_BAD_REQUEST)
+
+    short_products = [getShortProduct(product) for product in page.object_list]
+
+    return JsonResponse({
+        "products": short_products,
+        "more": page.has_next()
+    }, status=status.HTTP_200_OK, safe=False)
 
 
 def getProductDetails(request, id):

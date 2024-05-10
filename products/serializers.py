@@ -14,18 +14,22 @@ def getShortProduct(product):
 
 
 def getProduct(product):
-    res = {
+    product_images = ProductImage.objects.filter(product=product)
+
+    main_img = None
+    images = []
+    for product_image in product_images:
+        if product_image.main:
+            main_img = getImage(product_image.image)
+        else:
+            images.append(getImage(product_image.image))
+
+    return {
         "id": product.id,
         "name": product.name,
         "description": product.description,
         "price": product.price,
         "date": product.date,
-        "mainImg": "",
-        "images": []
+        "mainImg": main_img,
+        "images": images
     }
-    for productImage in ProductImage.objects.filter(product = product):
-        if productImage.main:
-            res["mainImg"] = getImage(productImage.image)
-        else:
-            res["images"].append(getImage(productImage.image))
-    return res

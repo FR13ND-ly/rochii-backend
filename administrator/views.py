@@ -12,7 +12,7 @@ from products.serializers import getProduct, getShortProduct
 from django.shortcuts import get_object_or_404
 from functools import wraps
 from django.contrib.auth.hashers import make_password, verify_password
-
+from django.core.paginator import Paginator
 
 
 def isAdmin(view_func):
@@ -80,17 +80,21 @@ def register(request):
 
 @isAdmin
 def getProducts(request, index):
-    for image in Image.objects.all():
-        if ProductImage.objects.filter(image = image).count() == 0:
-            image.delete()
+    page_size = 10 
     products = Product.objects.order_by("-date")
-    res = {
-        "products": [],
-        "more": (products.count() - 10 * (index - 1)) >= 10
-    }
-    for product in products[10 * (index - 1): 10 * index]:
-        res["products"].append(getShortProduct(product))
-    return JsonResponse(res, status=status.HTTP_200_OK, safe=False)
+
+    paginator = Paginator(products, page_size)
+    try:
+        page = paginator.page(index)
+    except:
+        return JsonResponse({'error': 'Invalid page index'}, status=status.HTTP_400_BAD_REQUEST)
+
+    short_products = [getShortProduct(product) for product in page.object_list]
+
+    return JsonResponse({
+        "products": short_products,
+        "more": page.has_next()
+    }, status=status.HTTP_200_OK, safe=False)
 
 
 @isAdmin
