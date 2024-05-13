@@ -9,10 +9,10 @@ from random import sample
 from django.core.paginator import Paginator
 
 def getProducts(request, index):
-    page_size = 10 
+    pageSize = 8
     products = Product.objects.order_by("-date")
 
-    paginator = Paginator(products, page_size)
+    paginator = Paginator(products, pageSize)
     try:
         page = paginator.page(index)
     except:
@@ -44,7 +44,7 @@ def getProductsByIds(request):
 def getSimilarProducts(request, id):
     queryset = Product.objects.exclude(id = id)
 
-    randomProducts = sample(list(queryset), 5)
+    randomProducts = sample(list(queryset), 4)
     
     res = []
     for product in randomProducts:

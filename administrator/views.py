@@ -80,10 +80,10 @@ def register(request):
 
 @isAdmin
 def getProducts(request, index):
-    page_size = 10 
+    pageSize = 10 
     products = Product.objects.order_by("-date")
 
-    paginator = Paginator(products, page_size)
+    paginator = Paginator(products, pageSize)
     try:
         page = paginator.page(index)
     except:

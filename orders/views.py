@@ -32,9 +32,22 @@ def createOrder(request):
         hour = data['hour'],
         details = data["details"]
     )
+    details = {
+        "date": order.date,
+        "hour": str(order.hour) + ":00",
+        "name": order.username,
+        "email": order.email,
+        "phone": order.phone,
+        "details": order.details,
+        "products": []
+    }
     order.save()
     for product in data["products"]:
         p = Product.objects.get(id = product["id"])
+        details["products"].append({
+            "name": p.name,
+            "price": p.price,
+        })
         orderProduct = OrderProduct.objects.create(
             order = order,
             product = p,
@@ -42,6 +55,7 @@ def createOrder(request):
         )
         orderProduct.save()
     res = getOrder(order)
+    # sendEmails(details)
     return JsonResponse(res, status=status.HTTP_201_CREATED)
 
 
@@ -49,22 +63,22 @@ def formatDate(date):
     return datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
 
 
-def sendEmails(email):
-    if email == "": return
-    subject = 'Comandă nouă'
-    customerMessage = render_to_string('customer_notification.html', email)
-    orderMessage = render_to_string('order_notification.html', email)
+def sendEmails(details):
+    if details["email"] == "": return
+    subject = 'Programare nouă'
+    orderMessage = render_to_string('order_notification.html', details)
+    customerMessage = render_to_string('customer_notification.html', details)
     send_mail(
         subject = subject, 
         message="",
         html_message=customerMessage, 
         from_email='contact@bride2beboutique.ro', 
-        recipient_list=[email["order"]["email"]]
+        recipient_list=[details["email"]]
     )
     send_mail(
         subject = subject, 
         message="",
         html_message=orderMessage, 
         from_email='contact@bride2beboutique.ro', 
-        recipient_list=[settings.EMAIL_RECIEVER]
+        recipient_list=[settings.EMAIL_RECEIVER]
     )
